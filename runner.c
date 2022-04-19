@@ -206,6 +206,108 @@ int lxi_to_sp_test()
 }
 
 
+int lda_test()
+{
+   State8080 *state = initilizeState();
+
+   state->pc = 0;
+   state->memory[0] = 0x3a;
+   state->memory[1] = 0x34;
+   state->memory[2] = 0x12;
+
+   uint16_t target =  0x1234;
+   ldaOpcodeHandler(state);
+
+   uint16_t a_reg = state->a;
+
+   cleanUpState(state);
+
+
+   _assert(a_reg == target);
+
+
+   return 0;
+}
+
+int sta_test()
+{
+   State8080 *state = initilizeState();
+   uint16_t target_addr =  0x1234;
+   uint16_t target = 0xdead;
+   uint16_t memory_contents;
+
+   state->pc = 0;
+   state->memory[0] = 0x3a;
+   state->memory[1] = 0x34;
+   state->memory[2] = 0x12;
+   state->a = 0xdead;
+
+
+
+   staOpcodeHandler(state);
+
+   memory_contents = state->memory[target_addr] << 8;
+   memory_contents = state->memory[target_addr+1] + memory_contents;
+
+   cleanUpState(state);
+
+
+   printf("%x\n", memory_contents);
+   _assert(target == memory_contents);
+
+
+   return 0;
+   
+}
+
+int lhld_test()
+{
+   State8080 *state = initilizeState();
+   uint16_t target = 0xdead;
+   uint16_t value;
+
+   state->pc = 0;
+   state->memory[0] = 0x2a;
+   state->memory[1] = 0x34;
+   state->memory[2] = 0x12;
+
+   memcpy(&state->memory[0x1234], &target, 2);
+   lhldOpcodeHandler(state);
+
+
+   value = (state->h << 8) | state->l;
+
+
+   cleanUpState(state);
+
+   _assert(target == value);
+
+   return 0;
+}
+
+int ldax_test()
+{
+   // TODO: write this test
+   
+   return 0;
+}
+
+
+int stax_test()
+{
+   // TODO: write this test
+   
+   return 0;
+}
+
+int xchg_test()
+{
+   // TODO: write this test
+
+   return 0;
+}
+
+
 #define NUM_OF_TESTS sizeof(test_ptrs)/sizeof(*test_ptrs) 
 
 int (*test_ptrs[])() = {
@@ -216,6 +318,9 @@ int (*test_ptrs[])() = {
    mvi_to_mem_test,
    lxi_to_reg_test,
    lxi_to_sp_test,
+   lda_test,
+   sta_test,
+   lhld_test,
 };
 
 

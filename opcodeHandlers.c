@@ -151,3 +151,130 @@ void lxiOpcodeHandler(struct State8080 *state)
    return;
 }
 
+void ldaOpcodeHandler(struct State8080 *state)
+{
+   unsigned int high_order_byte, low_order_byte;
+
+   low_order_byte = state->memory[state->pc+1];
+   high_order_byte = state->memory[state->pc+2];
+
+   state->a = (high_order_byte << 8) | low_order_byte;
+
+   return;
+
+}
+
+void staOpcodeHandler(struct State8080 *state)
+{
+   unsigned int high_order_byte, low_order_byte;
+   unsigned int memory_address;
+
+   low_order_byte = state->memory[state->pc+1];
+   high_order_byte = state->memory[state->pc+2];
+
+   memory_address = (high_order_byte << 8) | low_order_byte;
+
+   state->memory[memory_address]   = (state->a >> 8) & 0xff;;
+   state->memory[memory_address+1] = (state->a) & 0xff;;
+
+   return;
+
+
+}
+
+void lhldOpcodeHandler(struct State8080 *state)
+{
+
+   unsigned int high_order_byte, low_order_byte;
+   uint16_t  memory_addr;
+   low_order_byte = state->memory[state->pc+1];
+   high_order_byte = state->memory[state->pc+2];
+
+   memory_addr = (high_order_byte << 8) | low_order_byte;
+
+   state->l = state->memory[memory_addr];
+   state->h = state->memory[memory_addr+1];
+
+   return;
+}
+
+
+void shldOpcodeHandler(struct State8080 *state)
+{
+
+   unsigned int high_order_byte, low_order_byte;
+   uint16_t  memory_addr;
+   low_order_byte = state->memory[state->pc+1];
+   high_order_byte = state->memory[state->pc+2];
+
+   memory_addr = (high_order_byte << 8) | low_order_byte;
+
+   state->memory[memory_addr] = state->l;
+   state->memory[memory_addr+1] = state->h;
+
+
+   return;
+}
+
+void ldaxOpcodeHandler(struct State8080 *state)
+{
+   unsigned int opcode;
+   unsigned int rp;
+   uint8_t *high_reg=NULL; 
+   uint8_t *low_reg=NULL;
+   uint16_t memory_addr;
+
+   opcode = state->memory[state->pc];
+
+   rp = (opcode & 0b00110000 ) >> 4;
+
+   translate_reg_pair(rp, state, &high_reg, &low_reg);
+
+   memory_addr = (*high_reg) << 8 | *low_reg;
+
+   state->a = state->memory[memory_addr] << 8;
+   state->a = state->memory[memory_addr+1] | state->a;
+
+   return;
+}
+
+
+void staxOpcodeHandler(struct State8080 *state)
+{
+
+   unsigned int opcode;
+   unsigned int rp;
+   uint8_t *high_reg=NULL; 
+   uint8_t *low_reg=NULL;
+   uint16_t memory_addr;
+
+   opcode = state->memory[state->pc];
+
+   rp = (opcode & 0b00110000 ) >> 4;
+
+   translate_reg_pair(rp, state, &high_reg, &low_reg);
+
+   memory_addr = (*high_reg) << 8 | *low_reg;
+
+   state->memory[memory_addr] = state->a >> 8;
+   state->memory[memory_addr] = state->a & 0xff;
+
+   return;
+}
+
+
+void xchgOpcodeHandler(struct State8080 *state)
+{
+   uint8_t tmp;
+
+   tmp = state->h;
+   state->h = state->d;
+   state->d = tmp;
+
+   tmp = state->l;
+   state->l = state->e;
+   state->e = tmp;
+}
+
+
+
